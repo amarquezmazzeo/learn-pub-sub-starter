@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -31,6 +32,45 @@ func main() {
 	fmt.Println("Sending msg")
 	if err != nil {
 		log.Fatalf("error publishing message: %e\n", err)
+	}
+
+	gamelogic.PrintServerHelp()
+
+REPL:
+	for {
+		input := gamelogic.GetInput()
+		if len(input) != 1 {
+			log.Print("Invalid number of arguments received\n")
+			continue
+		}
+		switch input[0] {
+		case "pause":
+			log.Print("Sending pause message\n")
+			err = pubsub.PublishJSON(
+				messageChannel,
+				routing.ExchangePerilDirect,
+				routing.PauseKey,
+				routing.PlayingState{IsPaused: true})
+			if err != nil {
+				log.Fatalf("error publishing message: %e\n", err)
+			}
+		case "resume":
+			log.Print("Sending resume message\n")
+			err = pubsub.PublishJSON(
+				messageChannel,
+				routing.ExchangePerilDirect,
+				routing.PauseKey,
+				routing.PlayingState{IsPaused: false})
+			if err != nil {
+				log.Fatalf("error publishing message: %e\n", err)
+			}
+		case "quit":
+			log.Print("Exiting...\n")
+			break REPL
+		default:
+			log.Printf("Invalid argument '%s' received\n", input[0])
+			continue
+		}
 	}
 
 	closeSig := make(chan os.Signal, 1)
