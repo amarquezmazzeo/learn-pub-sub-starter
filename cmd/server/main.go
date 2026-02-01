@@ -14,8 +14,8 @@ import (
 func main() {
 	fmt.Println("Starting Peril server...")
 
-	amqpConn := "amqp://guest:guest@localhost:5672/"
-	conn, err := amqp.Dial(amqpConn)
+	rabbitMqURL := "amqp://guest:guest@localhost:5672/"
+	conn, err := amqp.Dial(rabbitMqURL)
 	if err != nil {
 		log.Fatalf("error establishing RabbitMQ connection: %e\n", err)
 	}
